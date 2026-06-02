@@ -6,26 +6,33 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class ="bg-blue-900">
-<section class="bg-blue-600 rounded-b-[100px] text-white">
-    <nav class="max-w-7xl mx-auto flex justify-between items-center px-6 py-6">
+<section class="min-h-screen bg-[url('img/banner-bg.jpg.jpeg')] bg-cover bg-center bg-no-repeat rounded-b-[100px] text-white ">
 
-        <h1 class="text-3xl font-bold">
-            LUGX
-        </h1>
+<!-- This navigation bar -->
 
-        <ul class="hidden md:flex gap-8">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Our Shop</a></li>
-            <li><a href="#">Product Details</a></li>
-            <li><a href="#">Contact Us</a></li>
-        </ul>
+    <nav class=" w-full mx-auto flex justify-between items-center px-20 py-20 pt-0">
+        <div class = "px-5 py-12"> 
+            <a class="px-6 py-3" href="#">
+                <img
+                src="img/logo.png" 
+                class="h-13 w-auto object-contain rounded-3xl w-full"  alt = "logo">
+            </a>
+            
+        </div>
+        
 
-        <button
-            class="bg-red-500 px-5 py-2 rounded-full">
-            Sign In
-        </button>
+        <div class="hidden md:flex gap-8 px-5 py-12 ">
+            <a class="rounded-full px-6 py-3 bg-blue-500 font-['Poppins',_sans-serif] text-[15px]" href="#">Home</a>
+            <a class="rounded-full px-6 py-3 hover:bg-blue-500 font-['Poppins',_sans-serif] text-[15px]" href="#">Our Shop</a>
+            <a class="rounded-full px-6 py-3 hover:bg-blue-500 font-['Poppins',_sans-serif] text-[15px]" href="#">Product Details</a>
+            <a class="rounded-full px-6 py-3 hover:bg-blue-500 font-['Poppins',_sans-serif] text-[15px]" href="#">Contact Us</a>
+            <button class=" bg-red-400 px-6 py-3 rounded-full font-['Poppins',_sans-serif] text-[15px]"><a href = "#">SIGN IN</a></button>
+            </a>
+        </div>
 
     </nav>
+
+<!-- This is the hero section -->
 
     <div
         class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center">
@@ -63,8 +70,8 @@
         <div>
 
             <img
-                src="https://picsum.photos/500/400"
-                class="rounded-3xl w-full">
+                src="img/banner-image.jpg.jpeg"
+                class="h-170 rounded-3xl w-full">
 
         </div>
 
