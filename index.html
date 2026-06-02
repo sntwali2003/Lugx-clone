@@ -5,8 +5,74 @@
     <title>Document</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class ="bg-blue-2000">
-    <img src="/img/google.png" alt = "Steven"/>
-    <h1>Hello World!</h1>
+<body class ="bg-blue-900">
+<div class="bg-blue-600 rounded-b-[100px] text-white">
+
+    <!-- NAVBAR -->
+    <nav class="max-w-7xl mx-auto flex justify-between items-center px-6 py-6">
+
+        <h1 class="text-3xl font-bold">
+            LUGX
+        </h1>
+
+        <ul class="hidden md:flex gap-8">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Shop</a></li>
+            <li><a href="#">Product</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+
+        <button
+            class="bg-red-500 px-5 py-2 rounded-full">
+            Sign In
+        </button>
+
+    </nav>
+
+    <!-- HERO -->
+    <div
+        class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-10 items-center">
+
+        <div>
+
+            <p class="uppercase font-semibold">
+                Welcome to Lugx
+            </p>
+
+            <h1 class="text-5xl font-bold mt-4">
+                Best Gaming Site Ever!
+            </h1>
+
+            <p class="mt-6 text-blue-100">
+                Practice cloning this website with Tailwind CSS.
+            </p>
+
+            <div class="mt-8 flex">
+
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    class="bg-white text-black px-5 py-3 rounded-l-full w-full">
+
+                <button
+                    class="bg-red-500 px-6 rounded-r-full">
+                    Search
+                </button>
+
+            </div>
+
+        </div>
+
+        <div>
+
+            <img
+                src="https://picsum.photos/500/400"
+                class="rounded-3xl w-full">
+
+        </div>
+
+    </div>
+
+</div>
 </body>
 </html>
