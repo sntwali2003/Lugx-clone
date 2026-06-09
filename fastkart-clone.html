@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fastkart – Fresh Grocery Delivery</title>
+
+  <!-- ✅ Tailwind CSS via CDN — no setup needed! -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <script>
+    // ✅ Extend Tailwind with our custom brand color
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#0da487',      /* main green */
+            'brand-dark': '#0b8f75',
+          },
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Countdown timer animation */
+    @keyframes pulse-once { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    .pulse { animation: pulse-once 1s ease-in-out infinite; }
+
+    /* Product card hover lift */
+    .product-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.10); }
+
+    /* Hero slider fade */
+    .slide { display:none; }
+    .slide.active { display:flex; }
+  </style>
+</head>
+
+<body class="font-sans text-gray-700 bg-white">
+
+<!-- ═══════════════════════════════════════════
+     TOP BAR  (thin strip at very top)
+═══════════════════════════════════════════ -->
+<div class="bg-brand text-white text-xs py-2 hidden md:block">
+  <div class="max-w-7xl mx-auto px-4 flex justify-between items-center">
+    <!-- Left: address -->
+    <span><i class="fas fa-map-marker-alt mr-1"></i>1418 Riverwood Drive, CA 96052, US</span>
+    <!-- Center: promo message -->
+    <span class="font-semibold">🎁 Welcome to Fastkart! New Coupon: <span class="underline">Fast024</span></span>
+    <!-- Right: language/currency -->
+    <div class="flex gap-4">
+      <span><i class="fas fa-globe mr-1"></i>English</span>
+      <span>USD</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MAIN HEADER  (logo + search + icons)
+═══════════════════════════════════════════ -->
+<header class="bg-white shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+
+    <!-- Logo -->
+    <a href="#" class="text-2xl font-extrabold text-brand shrink-0">
+      🛒 Fastkart
+    </a>
+
+    <!-- Location selector (desktop only) -->
+    <button class="hidden lg:flex items-center gap-2 border rounded-lg px-3 py-2 text-sm text-gray-500 hover:border-brand hover:text-brand transition shrink-0">
+      <i class="fas fa-map-marker-alt text-brand"></i>
+      <span>Your Location</span>
+      <i class="fas fa-chevron-down text-xs"></i>
+    </button>
+
+    <!-- Search bar -->
+    <div class="flex-1 flex items-center border-2 border-brand rounded-lg overflow-hidden">
+      <input
+        type="text"
+        placeholder="Search for groceries, vegetables, snacks…"
+        class="flex-1 px-4 py-2 text-sm outline-none"
+      />
+      <button class="bg-brand text-white px-5 py-2 text-sm font-semibold hover:bg-brand-dark transition">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+
+    <!-- Right icons -->
+    <div class="flex items-center gap-4 shrink-0">
+
+      <!-- Phone (desktop) -->
+      <div class="hidden xl:flex items-center gap-2 text-sm">
+        <i class="fas fa-phone-alt text-brand text-lg"></i>
+        <div>
+          <p class="text-xs text-gray-400">24/7 Delivery</p>
+          <p class="font-bold text-gray-700">+91 888 104 2340</p>
+        </div>
+      </div>
+
+      <!-- Wishlist -->
+      <button class="relative text-gray-600 hover:text-brand transition">
+        <i class="far fa-heart text-2xl"></i>
+        <span class="absolute -top-1 -right-1 bg-brand text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+      </button>
+
+      <!-- Cart -->
+      <button id="cartBtn" class="relative text-gray-600 hover:text-brand transition" onclick="toggleCart()">
+        <i class="fas fa-shopping-cart text-2xl"></i>
+        <span class="absolute -top-1 -right-1 bg-brand text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">2</span>
+      </button>
+
+      <!-- Account -->
+      <button class="hidden md:flex items-center gap-1 text-sm text-gray-600 hover:text-brand transition">
+        <i class="far fa-user text-xl"></i>
+        <span class="text-xs">Account</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ── CATEGORY NAV (second row) ── -->
+  <nav class="border-t bg-white hidden md:block">
+    <div class="max-w-7xl mx-auto px-4 flex items-center gap-1">
+
+      <!-- All Categories dropdown trigger -->
+      <div class="relative group">
+        <button class="flex items-center gap-2 bg-brand text-white px-5 py-3 text-sm font-bold">
+          <i class="fas fa-bars"></i> All Categories
+          <i class="fas fa-chevron-down text-xs ml-1"></i>
+        </button>
+        <!-- Dropdown -->
+        <div class="absolute left-0 top-full w-56 bg-white shadow-xl border rounded-b-lg z-40 hidden group-hover:block">
+          <ul class="py-2 text-sm">
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">🥦 Vegetables &amp; Fruit</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">☕ Beverages</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">🥩 Meats &amp; Seafood</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">🥞 Breakfast &amp; Dairy</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">❄️ Frozen Foods</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">🍪 Biscuits &amp; Snacks</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">🛒 Grocery &amp; Staples</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">🍷 Wines &amp; Drinks</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">🥛 Milk &amp; Dairies</a></li>
+            <li><a href="#" class="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 hover:text-brand">🐾 Pet Foods</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Navigation links -->
+      <a href="#" class="px-4 py-3 text-sm font-semibold text-gray-700 hover:text-brand transition">Home</a>
+      <a href="#" class="px-4 py-3 text-sm font-semibold text-gray-700 hover:text-brand transition">Shop</a>
+      <a href="#" class="px-4 py-3 text-sm font-semibold text-gray-700 hover:text-brand transition">Products</a>
+      <a href="#" class="px-4 py-3 text-sm font-semibold text-gray-700 hover:text-brand transition">Mega Menu</a>
+      <a href="#" class="px-4 py-3 text-sm font-semibold text-gray-700 hover:text-brand transition">Blog</a>
+      <a href="#" class="px-4 py-3 text-sm font-semibold text-gray-700 hover:text-brand transition flex items-center gap-1">
+        Pages <span class="bg-brand text-white text-xs px-1.5 py-0.5 rounded">New</span>
+      </a>
+      <a href="#" class="px-4 py-3 text-sm font-semibold text-gray-700 hover:text-brand transition">Seller</a>
+
+      <!-- Deal Today badge -->
+      <span class="ml-auto text-sm font-bold text-brand pulse">🔥 Deal Today</span>
+    </div>
+  </nav>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     MINI CART DROPDOWN
+═══════════════════════════════════════════ -->
+<div id="cartDropdown" class="hidden fixed right-4 top-24 bg-white shadow-2xl rounded-xl w-80 z-50 p-4 border">
+  <h3 class="font-bold text-gray-800 mb-3 border-b pb-2">🛒 My Cart</h3>
+
+  <!-- Cart item 1 -->
+  <div class="flex gap-3 items-center mb-3">
+    <div class="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">🍪</div>
+    <div class="flex-1">
+      <p class="text-sm font-semibold">Fantasy Crunchy Choco Chip Cookies</p>
+      <p class="text-xs text-gray-400">1 × <span class="text-brand font-bold">$80.58</span></p>
+    </div>
+    <button class="text-gray-300 hover:text-red-400 text-lg">×</button>
+  </div>
+
+  <!-- Cart item 2 -->
+  <div class="flex gap-3 items-center mb-4">
+    <div class="w-14 h-14 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">🥜</div>
+    <div class="flex-1">
+      <p class="text-sm font-semibold">Peanut Butter Bite Premium Cookies 600g</p>
+      <p class="text-xs text-gray-400">1 × <span class="text-brand font-bold">$25.68</span></p>
+    </div>
+    <button class="text-gray-300 hover:text-red-400 text-lg">×</button>
+  </div>
+
+  <div class="border-t pt-3 flex justify-between items-center mb-3">
+    <span class="font-semibold text-gray-600">Total:</span>
+    <span class="font-extrabold text-brand text-lg">$106.58</span>
+  </div>
+  <div class="flex gap-2">
+    <a href="#" class="flex-1 text-center border-2 border-brand text-brand py-2 rounded-lg text-sm font-bold hover:bg-brand hover:text-white transition">View Cart</a>
+    <a href="#" class="flex-1 text-center bg-brand text-white py-2 rounded-lg text-sm font-bold hover:bg-brand-dark transition">Checkout</a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     HERO SECTION  (main banner slider + side banners)
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 py-6">
+  <div class="flex gap-4">
+
+    <!-- MAIN HERO SLIDER -->
+    <div class="relative flex-1 rounded-2xl overflow-hidden min-h-[340px]">
+
+      <!-- Slide 1 -->
+      <div class="slide active w-full h-full min-h-[340px] bg-gradient-to-br from-green-50 to-green-100 flex items-center p-10 rounded-2xl">
+        <div class="max-w-sm">
+          <span class="bg-brand text-white text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">Exclusive offer 30% Off</span>
+          <h1 class="text-4xl font-extrabold text-gray-800 leading-tight mb-3">
+            Stay home &amp; get your<br/><span class="text-brand">Daily Needs</span> delivered
+          </h1>
+          <p class="text-gray-500 mb-6 text-sm">Fresh vegetables and fruits delivered to your doorstep every day.</p>
+          <a href="#" class="bg-brand text-white px-7 py-3 rounded-full font-bold hover:bg-brand-dark transition inline-block">Shop Now →</a>
+        </div>
+        <!-- Decorative emoji fruit -->
+        <div class="absolute right-8 top-1/2 -translate-y-1/2 text-9xl opacity-20 select-none hidden lg:block">🥦</div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="slide w-full h-full min-h-[340px] bg-gradient-to-br from-amber-50 to-orange-100 flex items-center p-10 rounded-2xl">
+        <div class="max-w-sm">
+          <span class="bg-orange-400 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">45% OFF</span>
+          <h2 class="text-4xl font-extrabold text-gray-800 leading-tight mb-3">
+            Nut <span class="text-orange-500">Collection</span>
+          </h2>
+          <p class="text-gray-500 mb-6 text-sm">We deliver organic vegetables &amp; fruits fresh every hour.</p>
+          <a href="#" class="bg-orange-400 text-white px-7 py-3 rounded-full font-bold hover:bg-orange-500 transition inline-block">Shop Now →</a>
+        </div>
+        <div class="absolute right-8 top-1/2 -translate-y-1/2 text-9xl opacity-20 select-none hidden lg:block">🥜</div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="slide w-full h-full min-h-[340px] bg-gradient-to-br from-red-50 to-pink-100 flex items-center p-10 rounded-2xl">
+        <div class="max-w-sm">
+          <span class="bg-red-400 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block">Organic Market</span>
+          <h2 class="text-4xl font-extrabold text-gray-800 leading-tight mb-3">
+            <span class="text-red-400">Healthy</span> Food<br/>Daily Fresh
+          </h2>
+          <p class="text-gray-500 mb-6 text-sm">Start your daily shopping with organic food from our market.</p>
+          <a href="#" class="bg-red-400 text-white px-7 py-3 rounded-full font-bold hover:bg-red-500 transition inline-block">Shop Now →</a>
+        </div>
+        <div class="absolute right-8 top-1/2 -translate-y-1/2 text-9xl opacity-20 select-none hidden lg:block">🍎</div>
+      </div>
+
+      <!-- Slider buttons -->
+      <button onclick="prevSlide()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white shadow-md w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:text-brand">‹</button>
+      <button onclick="nextSlide()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white shadow-md w-9 h-9 rounded-full flex items-center justify-center text-gray-500 hover:text-brand">›</button>
+
+      <!-- Dots -->
+      <div id="dots" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2"></div>
+    </div>
+
+    <!-- RIGHT SIDE BANNERS (desktop only) -->
+    <div class="hidden lg:flex flex-col gap-4 w-64">
+
+      <!-- Banner 1 -->
+      <div class="bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl p-5 flex-1 flex flex-col justify-center">
+        <span class="text-xs font-bold text-blue-400 uppercase mb-1">5% OFF</span>
+        <h3 class="font-extrabold text-gray-800 text-lg leading-tight mb-1">Hot Deals on<br/>New Items</h3>
+        <p class="text-xs text-gray-400 mb-3">Daily Essentials Eggs &amp; Dairy</p>
+        <a href="#" class="text-blue-500 font-bold text-sm hover:underline">Shop Now →</a>
+      </div>
+
+      <!-- Banner 2 -->
+      <div class="bg-gradient-to-br from-purple-50 to-fuchsia-100 rounded-xl p-5 flex-1 flex flex-col justify-center">
+        <span class="text-xs font-bold text-purple-400 uppercase mb-1">5% OFF</span>
+        <h3 class="font-extrabold text-gray-800 text-lg leading-tight mb-1">Buy More &amp;<br/>Save More</h3>
+        <p class="text-xs text-gray-400 mb-3">🥦 Fresh Vegetables</p>
+        <a href="#" class="text-purple-500 font-bold text-sm hover:underline">Shop Now →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CATEGORIES SECTION
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 py-8">
+
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="text-2xl font-extrabold text-gray-800">Category</h2>
+    </div>
+    <a href="#" class="text-brand font-semibold text-sm hover:underline">View All →</a>
+  </div>
+
+  <!-- Categories grid -->
+  <div class="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-3">
+
+    <!-- Each category card: emoji icon + label -->
+    <!-- TIP: Just copy-paste one of these blocks to add more categories -->
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-green-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">🥦</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Vegetables &amp; Fruit</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-yellow-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">☕</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Beverages</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-red-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">🥩</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Meats &amp; Seafood</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-orange-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">🥞</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Breakfast &amp; Dairy</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-blue-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">❄️</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Frozen Foods</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-amber-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">🍪</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Biscuits &amp; Snacks</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-lime-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">🛒</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Grocery &amp; Staples</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-purple-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">🍷</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Wines &amp; Drinks</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-sky-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">🥛</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Milk &amp; Dairies</span>
+    </a>
+
+    <a href="#" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-pink-50 hover:bg-brand hover:text-white group transition text-center">
+      <span class="text-3xl">🐾</span>
+      <span class="text-xs font-semibold text-gray-700 group-hover:text-white">Pet Foods</span>
+    </a>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     PROMO BANNERS ROW
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 pb-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <div class="bg-gradient-to-r from-teal-400 to-teal-600 rounded-2xl p-8 text-white flex justify-between items-center">
+      <div>
+        <p class="text-sm font-semibold opacity-80 mb-1">Seafood</p>
+        <h3 class="text-2xl font-extrabold leading-tight mb-3">Freshest Products<br/>Every Hour</h3>
+        <a href="#" class="bg-white text-teal-600 px-5 py-2 rounded-full font-bold text-sm hover:bg-teal-50 transition">Shop Now</a>
+      </div>
+      <span class="text-7xl hidden sm:block">🦞</span>
+    </div>
+
+    <div class="bg-gradient-to-r from-green-500 to-emerald-700 rounded-2xl p-8 text-white flex justify-between items-center">
+      <div>
+        <p class="text-sm font-semibold opacity-80 mb-1">Organic</p>
+        <h3 class="text-2xl font-extrabold leading-tight mb-3">Fresh Vegetables<br/><span class="text-yellow-300">50% Off</span></h3>
+        <a href="#" class="bg-white text-green-700 px-5 py-2 rounded-full font-bold text-sm hover:bg-green-50 transition">Shop Now</a>
+      </div>
+      <span class="text-7xl hidden sm:block">🥬</span>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     TRENDING PRODUCTS SECTION
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 py-8 bg-gray-50 rounded-2xl mb-8">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <p class="text-brand text-sm font-bold uppercase tracking-wider">What's Hot</p>
+      <h2 class="text-2xl font-extrabold text-gray-800">Trending Products</h2>
+    </div>
+    <a href="#" class="text-brand font-semibold text-sm hover:underline">View All →</a>
+  </div>
+
+  <!-- Product grid -->
+  <!-- TIP: Each product card follows the same pattern — just duplicate it! -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+
+    <!-- Product Card template (repeated) -->
+    <!-- Product 1 -->
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <!-- Badge -->
+      <div class="relative">
+        <div class="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-5xl mb-2">🍖</div>
+      </div>
+      <p class="text-xs text-gray-400">450 G</p>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Meatigo Premium Goat Curry</h4>
+      <p class="text-brand font-extrabold">$70.00</p>
+      <button class="mt-auto bg-brand text-white w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand-dark transition">+ Add</button>
+    </div>
+
+    <!-- Product 2 -->
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-5xl mb-2">🌴</div>
+      <p class="text-xs text-gray-400">450 G</p>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Dates Medjoul Premium Imported</h4>
+      <p class="text-brand font-extrabold">$40.00</p>
+      <button class="mt-auto bg-brand text-white w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand-dark transition">+ Add</button>
+    </div>
+
+    <!-- Product 3 -->
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-5xl mb-2">🥜</div>
+      <p class="text-xs text-gray-400">200 G</p>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Good Life Walnut Kernels</h4>
+      <p class="text-brand font-extrabold">$52.00</p>
+      <button class="mt-auto bg-brand text-white w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand-dark transition">+ Add</button>
+    </div>
+
+    <!-- Product 4 -->
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-5xl mb-2">🍎</div>
+      <p class="text-xs text-gray-400">1 KG</p>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Apple Red Premium Imported</h4>
+      <p class="text-brand font-extrabold">$80.00</p>
+      <button class="mt-auto bg-brand text-white w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand-dark transition">+ Add</button>
+    </div>
+
+    <!-- Product 5 -->
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-5xl mb-2">🫐</div>
+      <p class="text-xs text-gray-400">250 G</p>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Fresh Blueberries Premium</h4>
+      <p class="text-brand font-extrabold">$35.00</p>
+      <button class="mt-auto bg-brand text-white w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand-dark transition">+ Add</button>
+    </div>
+
+    <!-- Product 6 -->
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-gray-50 rounded-lg flex items-center justify-center text-5xl mb-2">🫚</div>
+      <p class="text-xs text-gray-400">1 L</p>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Good Life Refined Sunflower Oil</h4>
+      <p class="text-brand font-extrabold">$18.00</p>
+      <button class="mt-auto bg-brand text-white w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand-dark transition">+ Add</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     TOP SAVE TODAY  (countdown + featured product)
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex flex-col lg:flex-row gap-8 items-center bg-gradient-to-br from-brand/5 to-brand/10 rounded-2xl p-8">
+
+    <!-- Left: text + countdown -->
+    <div class="flex-1">
+      <p class="text-brand text-sm font-bold uppercase tracking-wider mb-1">Limited Time</p>
+      <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Top Save Today</h2>
+      <p class="text-gray-400 text-sm mb-6">Don't miss this special discount — this week only!</p>
+
+      <!-- Countdown timer -->
+      <p class="text-xs text-gray-500 mb-2 font-semibold uppercase">Expires in:</p>
+      <div class="flex gap-3">
+        <div class="bg-brand text-white rounded-xl w-16 h-16 flex flex-col items-center justify-center">
+          <span id="hours" class="text-2xl font-extrabold leading-none">08</span>
+          <span class="text-xs opacity-70">Hrs</span>
+        </div>
+        <div class="bg-brand text-white rounded-xl w-16 h-16 flex flex-col items-center justify-center">
+          <span id="mins" class="text-2xl font-extrabold leading-none">45</span>
+          <span class="text-xs opacity-70">Min</span>
+        </div>
+        <div class="bg-brand text-white rounded-xl w-16 h-16 flex flex-col items-center justify-center">
+          <span id="secs" class="text-2xl font-extrabold leading-none">30</span>
+          <span class="text-xs opacity-70">Sec</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: product -->
+    <div class="flex-1 flex gap-6 items-center bg-white rounded-2xl p-6 shadow-sm">
+      <div class="text-8xl">🍪</div>
+      <div>
+        <p class="text-xs text-gray-400 mb-1">Featured Deal</p>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-1">Fantasy Crunchy Choco Chip Cookies</h3>
+        <!-- Stars -->
+        <div class="flex text-yellow-400 text-sm mb-2">★★★★★</div>
+        <div class="flex items-baseline gap-2 mb-3">
+          <span class="text-brand font-extrabold text-xl">$26.69</span>
+          <span class="text-gray-300 line-through text-sm">$28.56</span>
+        </div>
+        <p class="text-xs text-green-500 font-semibold mb-3">✓ In Stock</p>
+        <button class="bg-brand text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-brand-dark transition">+ Add to Cart</button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOD CUPBOARD (product grid with tabs)
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+    <div>
+      <p class="text-brand text-sm font-bold uppercase tracking-wider">Fresh Picks</p>
+      <h2 class="text-2xl font-extrabold text-gray-800">Food Cupboard</h2>
+    </div>
+    <!-- Category filter tabs -->
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="setTab(this,'All')" class="tab-btn active px-4 py-1.5 rounded-full text-sm font-semibold bg-brand text-white">All</button>
+      <button onclick="setTab(this,'Snacks')" class="tab-btn px-4 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-brand hover:text-white transition">Snacks</button>
+      <button onclick="setTab(this,'Dairy')" class="tab-btn px-4 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-brand hover:text-white transition">Dairy</button>
+      <button onclick="setTab(this,'Fruits')" class="tab-btn px-4 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-brand hover:text-white transition">Fruits</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+
+    <!-- Each card has: emoji, optional badge, name, price, add button -->
+
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2 relative">
+      <span class="absolute top-2 right-2 bg-red-400 text-white text-xs px-2 py-0.5 rounded-full font-bold">NEW</span>
+      <div class="w-full aspect-square bg-amber-50 rounded-lg flex items-center justify-center text-5xl mb-1">🍫</div>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Chocolate Powder</h4>
+      <div class="flex items-baseline gap-1">
+        <span class="text-brand font-extrabold">$26.69</span>
+        <span class="text-gray-300 line-through text-xs">$28.56</span>
+      </div>
+      <button class="mt-auto border-2 border-brand text-brand w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand hover:text-white transition">+ Add</button>
+    </div>
+
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-yellow-50 rounded-lg flex items-center justify-center text-5xl mb-1">🥮</div>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Sandwich Cookies</h4>
+      <div class="flex items-baseline gap-1">
+        <span class="text-brand font-extrabold">$26.69</span>
+        <span class="text-gray-300 line-through text-xs">$28.56</span>
+      </div>
+      <button class="mt-auto border-2 border-brand text-brand w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand hover:text-white transition">+ Add</button>
+    </div>
+
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-orange-50 rounded-lg flex items-center justify-center text-5xl mb-1">🥐</div>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Butter Croissant</h4>
+      <div class="flex items-baseline gap-1">
+        <span class="text-brand font-extrabold">$26.69</span>
+        <span class="text-gray-300 line-through text-xs">$28.56</span>
+      </div>
+      <button class="mt-auto border-2 border-brand text-brand w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand hover:text-white transition">+ Add</button>
+    </div>
+
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2 relative">
+      <span class="absolute top-2 right-2 bg-brand text-white text-xs px-2 py-0.5 rounded-full font-bold">SALE</span>
+      <div class="w-full aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-5xl mb-1">🍫</div>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Dark Chocolate Bar</h4>
+      <div class="flex items-baseline gap-1">
+        <span class="text-brand font-extrabold">$26.69</span>
+        <span class="text-gray-300 line-through text-xs">$28.56</span>
+      </div>
+      <button class="mt-auto border-2 border-brand text-brand w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand hover:text-white transition">+ Add</button>
+    </div>
+
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-pink-50 rounded-lg flex items-center justify-center text-5xl mb-1">🍬</div>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Mix Sweet Food</h4>
+      <div class="flex items-baseline gap-1">
+        <span class="text-brand font-extrabold">$26.69</span>
+        <span class="text-gray-300 line-through text-xs">$28.56</span>
+      </div>
+      <button class="mt-auto border-2 border-brand text-brand w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand hover:text-white transition">+ Add</button>
+    </div>
+
+    <div class="product-card bg-white rounded-xl p-4 border border-gray-100 flex flex-col gap-2">
+      <div class="w-full aspect-square bg-blue-50 rounded-lg flex items-center justify-center text-5xl mb-1">🥛</div>
+      <h4 class="text-sm font-bold text-gray-700 leading-tight">Long Life Toned Milk 1L</h4>
+      <div class="flex items-baseline gap-1">
+        <span class="text-brand font-extrabold">$26.69</span>
+        <span class="text-gray-300 line-through text-xs">$28.56</span>
+      </div>
+      <button class="mt-auto border-2 border-brand text-brand w-full py-1.5 rounded-lg text-xs font-bold hover:bg-brand hover:text-white transition">+ Add</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     CASHBACK BANNER
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 pb-8">
+  <div class="bg-gradient-to-r from-brand to-emerald-600 rounded-2xl px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-white">
+    <div>
+      <h3 class="text-2xl font-extrabold mb-1">Get $3 Cashback!</h3>
+      <p class="text-sm opacity-80">Minimum order of $30</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm opacity-80 mb-1">Use Code:</p>
+      <span class="bg-white text-brand font-extrabold text-lg px-6 py-2 rounded-full">GROCERY1920</span>
+    </div>
+    <button class="bg-white text-brand font-bold px-6 py-3 rounded-full hover:bg-green-50 transition">Copy Code</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     BLOG SECTION
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <p class="text-brand text-sm font-bold uppercase tracking-wider">Tips &amp; Recipes</p>
+      <h2 class="text-2xl font-extrabold text-gray-800">Featured Blog</h2>
+    </div>
+    <a href="#" class="text-brand font-semibold text-sm hover:underline">View All →</a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+    <!-- Blog Card 1 -->
+    <article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition">
+      <div class="w-full h-44 bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center text-7xl">🥕</div>
+      <div class="p-5">
+        <p class="text-xs text-gray-400 mb-1">20 March, 2022 · <span class="text-brand">Fresh Vegetable Online</span></p>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-2">5 Tips for Buying Fresh Vegetables Online</h3>
+        <p class="text-sm text-gray-400 mb-4">Learn how to select the best produce from online grocery stores and keep them fresh longer.</p>
+        <a href="#" class="text-brand font-bold text-sm hover:underline">Read More →</a>
+      </div>
+    </article>
+
+    <!-- Blog Card 2 -->
+    <article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition">
+      <div class="w-full h-44 bg-gradient-to-br from-yellow-200 to-orange-300 flex items-center justify-center text-7xl">🍊</div>
+      <div class="p-5">
+        <p class="text-xs text-gray-400 mb-1">10 April, 2022 · <span class="text-brand">Fresh Combo Fruit</span></p>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-2">Best Fruit Combos for a Healthy Breakfast</h3>
+        <p class="text-sm text-gray-400 mb-4">Discover delicious and nutritious fruit combinations to kickstart your morning the right way.</p>
+        <a href="#" class="text-brand font-bold text-sm hover:underline">Read More →</a>
+      </div>
+    </article>
+
+    <!-- Blog Card 3 -->
+    <article class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition">
+      <div class="w-full h-44 bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center text-7xl">🥜</div>
+      <div class="p-5">
+        <p class="text-xs text-gray-400 mb-1">10 April, 2022 · <span class="text-brand">Nuts &amp; Snacks</span></p>
+        <h3 class="font-extrabold text-gray-800 text-lg mb-2">Nuts to Eat for Better Health</h3>
+        <p class="text-sm text-gray-400 mb-4">From almonds to walnuts, here are the best nuts to snack on for heart health and energy.</p>
+        <a href="#" class="text-brand font-bold text-sm hover:underline">Read More →</a>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     NEWSLETTER
+═══════════════════════════════════════════ -->
+<section class="bg-gray-50 py-12 mt-4">
+  <div class="max-w-2xl mx-auto px-4 text-center">
+    <p class="text-brand font-bold text-sm uppercase tracking-wider mb-1">Newsletter</p>
+    <h2 class="text-3xl font-extrabold text-gray-800 mb-2">Join our newsletter and get…</h2>
+    <p class="text-gray-400 mb-6"><span class="text-brand font-bold">$20 discount</span> for your first order</p>
+    <!-- Subscribe form -->
+    <div class="flex max-w-md mx-auto rounded-full overflow-hidden border-2 border-brand shadow-sm">
+      <input type="email" placeholder="Enter your email address…" class="flex-1 px-5 py-3 text-sm outline-none" />
+      <button class="bg-brand text-white px-7 font-bold text-sm hover:bg-brand-dark transition">Subscribe</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FEATURES STRIP
+═══════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 py-10">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+
+    <div class="flex flex-col items-center gap-2">
+      <div class="w-14 h-14 bg-brand/10 text-brand rounded-full flex items-center justify-center text-2xl">🌿</div>
+      <p class="font-bold text-gray-800 text-sm">Every Fresh Product</p>
+    </div>
+
+    <div class="flex flex-col items-center gap-2">
+      <div class="w-14 h-14 bg-brand/10 text-brand rounded-full flex items-center justify-center text-2xl">🚚</div>
+      <p class="font-bold text-gray-800 text-sm">Free Delivery Over $50</p>
+    </div>
+
+    <div class="flex flex-col items-center gap-2">
+      <div class="w-14 h-14 bg-brand/10 text-brand rounded-full flex items-center justify-center text-2xl">🏷️</div>
+      <p class="font-bold text-gray-800 text-sm">Daily Mega Discounts</p>
+    </div>
+
+    <div class="flex flex-col items-center gap-2">
+      <div class="w-14 h-14 bg-brand/10 text-brand rounded-full flex items-center justify-center text-2xl">💰</div>
+      <p class="font-bold text-gray-800 text-sm">Best Price On Market</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer class="bg-gray-900 text-gray-300 pt-12 pb-6">
+  <div class="max-w-7xl mx-auto px-4">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+
+      <!-- Brand info -->
+      <div>
+        <h2 class="text-white text-2xl font-extrabold mb-3">🛒 Fastkart</h2>
+        <p class="text-sm leading-relaxed mb-4">Your friendly neighbourhood online grocery store delivering fresh produce daily.</p>
+        <p class="text-sm"><i class="fas fa-map-marker-alt text-brand mr-2"></i>1418 Riverwood Drive, CA 96052, US</p>
+        <p class="text-sm mt-1"><i class="fas fa-envelope text-brand mr-2"></i>support@fastkart.com</p>
+      </div>
+
+      <!-- Categories -->
+      <div>
+        <h3 class="text-white font-bold text-base mb-4">Categories</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-brand transition">Vegetables &amp; Fruit</a></li>
+          <li><a href="#" class="hover:text-brand transition">Beverages</a></li>
+          <li><a href="#" class="hover:text-brand transition">Meats &amp; Seafood</a></li>
+          <li><a href="#" class="hover:text-brand transition">Frozen Foods</a></li>
+          <li><a href="#" class="hover:text-brand transition">Biscuits &amp; Snacks</a></li>
+          <li><a href="#" class="hover:text-brand transition">Grocery &amp; Staples</a></li>
+        </ul>
+      </div>
+
+      <!-- Useful Links -->
+      <div>
+        <h3 class="text-white font-bold text-base mb-4">Useful Links</h3>
+        <ul class="space-y-2 text-sm">
+          <li><a href="#" class="hover:text-brand transition">Home</a></li>
+          <li><a href="#" class="hover:text-brand transition">Shop</a></li>
+          <li><a href="#" class="hover:text-brand transition">About Us</a></li>
+          <li><a href="#" class="hover:text-brand transition">Blog</a></li>
+          <li><a href="#" class="hover:text-brand transition">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Help Center + App download -->
+      <div>
+        <h3 class="text-white font-bold text-base mb-4">Contact Us</h3>
+        <p class="text-xs text-gray-400 mb-1">Hotline 24/7</p>
+        <p class="text-white font-bold text-base mb-3">+91 888 104 2340</p>
+        <p class="text-xs text-gray-400 mb-1">Email</p>
+        <p class="text-white font-bold text-sm mb-4">fastkart@hotmail.com</p>
+        <!-- App badges -->
+        <p class="text-xs text-gray-400 mb-2">Download App:</p>
+        <div class="flex gap-3">
+          <a href="#" class="bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1 transition">
+            <i class="fab fa-google-play"></i> Play Store
+          </a>
+          <a href="#" class="bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1 transition">
+            <i class="fab fa-apple"></i> App Store
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="border-t border-gray-700 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+      <p>©2024 Fastkart. All rights reserved.</p>
+      <!-- Payment icons -->
+      <div class="flex items-center gap-3">
+        <span class="bg-white text-gray-700 rounded px-2 py-1 font-bold text-xs">VISA</span>
+        <span class="bg-blue-600 text-white rounded px-2 py-1 font-bold text-xs">PP</span>
+        <span class="bg-red-500 text-white rounded px-2 py-1 font-bold text-xs">MC</span>
+        <span class="bg-blue-800 text-white rounded px-2 py-1 font-bold text-xs">AMEX</span>
+      </div>
+      <!-- Social -->
+      <div class="flex gap-3">
+        <a href="#" class="w-8 h-8 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center transition"><i class="fab fa-facebook-f text-xs"></i></a>
+        <a href="#" class="w-8 h-8 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center transition"><i class="fab fa-twitter text-xs"></i></a>
+        <a href="#" class="w-8 h-8 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center transition"><i class="fab fa-instagram text-xs"></i></a>
+        <a href="#" class="w-8 h-8 bg-gray-700 hover:bg-brand rounded-full flex items-center justify-center transition"><i class="fab fa-pinterest-p text-xs"></i></a>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════
+     MOBILE BOTTOM NAV BAR
+═══════════════════════════════════════════ -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg flex md:hidden z-50">
+  <a href="#" class="flex-1 flex flex-col items-center py-2 text-brand text-xs gap-1">
+    <i class="fas fa-home text-lg"></i> Home
+  </a>
+  <a href="#" class="flex-1 flex flex-col items-center py-2 text-gray-500 text-xs gap-1 hover:text-brand transition">
+    <i class="fas fa-th-large text-lg"></i> Category
+  </a>
+  <a href="#" class="flex-1 flex flex-col items-center py-2 text-gray-500 text-xs gap-1 hover:text-brand transition">
+    <i class="fas fa-search text-lg"></i> Search
+  </a>
+  <a href="#" class="flex-1 flex flex-col items-center py-2 text-gray-500 text-xs gap-1 hover:text-brand transition">
+    <i class="far fa-heart text-lg"></i> Wishlist
+  </a>
+  <button onclick="toggleCart()" class="flex-1 flex flex-col items-center py-2 text-gray-500 text-xs gap-1 hover:text-brand transition relative">
+    <i class="fas fa-shopping-cart text-lg"></i> Cart
+    <span class="absolute top-1 right-5 bg-brand text-white text-xs w-4 h-4 rounded-full flex items-center justify-center text-[10px]">2</span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT  (slider + countdown + cart toggle + tabs)
+     All beginner-friendly with comments!
+═══════════════════════════════════════════ -->
+<script>
+  // ── HERO SLIDER ──────────────────────────────
+  // Get all slide elements
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dots');
+  let current = 0; // tracks which slide is showing
+
+  // Create dot buttons dynamically
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = `w-2 h-2 rounded-full transition ${i === 0 ? 'bg-brand w-5' : 'bg-white/60'}`;
+    dot.onclick = () => goToSlide(i);
+    dotsContainer.appendChild(dot);
+  });
+
+  function goToSlide(index) {
+    // Hide the current slide
+    slides[current].classList.remove('active');
+    dotsContainer.children[current].className = 'w-2 h-2 rounded-full bg-white/60 transition';
+    // Show the new slide
+    current = index;
+    slides[current].classList.add('active');
+    dotsContainer.children[current].className = 'w-5 h-2 rounded-full bg-brand transition';
+  }
+
+  function nextSlide() {
+    // Go to next slide (wrap around to 0 at the end)
+    goToSlide((current + 1) % slides.length);
+  }
+
+  function prevSlide() {
+    // Go to previous slide (wrap around to last at the beginning)
+    goToSlide((current - 1 + slides.length) % slides.length);
+  }
+
+  // Auto-advance slider every 4 seconds
+  setInterval(nextSlide, 4000);
+
+
+  // ── COUNTDOWN TIMER ──────────────────────────
+  // Set end time to 8 hours from now
+  let endTime = Date.now() + 8 * 60 * 60 * 1000;
+
+  function updateCountdown() {
+    const remaining = endTime - Date.now(); // milliseconds left
+    if (remaining <= 0) { endTime = Date.now() + 8 * 60 * 60 * 1000; return; }
+
+    const h = Math.floor(remaining / 3600000);          // hours
+    const m = Math.floor((remaining % 3600000) / 60000); // minutes
+    const s = Math.floor((remaining % 60000) / 1000);    // seconds
+
+    // Update the DOM elements
+    document.getElementById('hours').textContent = String(h).padStart(2, '0');
+    document.getElementById('mins').textContent  = String(m).padStart(2, '0');
+    document.getElementById('secs').textContent  = String(s).padStart(2, '0');
+  }
+
+  // Run countdown every second
+  setInterval(updateCountdown, 1000);
+  updateCountdown(); // run once immediately so there's no blank flash
+
+
+  // ── CART TOGGLE ──────────────────────────────
+  function toggleCart() {
+    const cart = document.getElementById('cartDropdown');
+    cart.classList.toggle('hidden');
+  }
+
+  // Close cart if you click anywhere outside it
+  document.addEventListener('click', function(e) {
+    const cart = document.getElementById('cartDropdown');
+    const cartBtn = document.getElementById('cartBtn');
+    if (!cart.contains(e.target) && !cartBtn.contains(e.target)) {
+      cart.classList.add('hidden');
+    }
+  });
+
+
+  // ── TAB FILTER (Food Cupboard) ────────────────
+  function setTab(btn, category) {
+    // Remove active style from all tab buttons
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('bg-brand', 'text-white');
+      b.classList.add('bg-gray-100', 'text-gray-600');
+    });
+    // Add active style to clicked button
+    btn.classList.add('bg-brand', 'text-white');
+    btn.classList.remove('bg-gray-100', 'text-gray-600');
+    // In a real app you'd filter products here
+    // For now we just switch the active button
+  }
+</script>
+
+</body>
+</html>
